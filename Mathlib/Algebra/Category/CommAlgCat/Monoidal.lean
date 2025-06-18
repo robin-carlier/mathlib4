@@ -5,6 +5,7 @@ Authors: Yaël Dillies, Christian Merten, Michał Mrugała, Andrew Yang
 -/
 import Mathlib.Algebra.Category.CommAlgCat.Basic
 import Mathlib.CategoryTheory.Monoidal.Cartesian.Basic
+import Mathlib.CategoryTheory.Monoidal.Opposite
 
 /-!
 # The cocartesian monoidal category structure on commutative `R`-algebras
@@ -58,43 +59,35 @@ open Opposite Algebra.TensorProduct CommAlgCat
 
 attribute [local ext] Quiver.Hom.unop_inj
 
-instance : MonoidalCategory (CommAlgCat.{u} R)ᵒᵖ where
-  tensorObj S T := op <| of R (S.unop ⊗[R] T.unop)
-  whiskerLeft S {T₁ T₂} f := .op <| ofHom (Algebra.TensorProduct.map (.id _ _) f.unop.hom)
-  whiskerRight {S₁ S₂} f T := .op <| ofHom (Algebra.TensorProduct.map f.unop.hom (.id _ _))
-  tensorHom {S₁ S₂ T₁ T₂} f g := .op <| ofHom (map f.unop.hom g.unop.hom)
-  tensorUnit := .op (.of R R)
-  associator {S T U} := .op <| isoMk (Algebra.TensorProduct.assoc R R _ _ _).symm
-  leftUnitor S := .op <| isoMk (Algebra.TensorProduct.lid R _).symm
-  rightUnitor _ := .op <| isoMk (Algebra.TensorProduct.rid R R _).symm
-  tensorHom_def := by intros; ext <;> rfl
-  tensor_id := by intros; ext <;> rfl
-  tensor_comp := by intros; ext <;> rfl
-  whiskerLeft_id := by intros; ext <;> rfl
-  id_whiskerRight := by intros; ext <;> rfl
-  associator_naturality := by intros; ext <;> rfl
-  leftUnitor_naturality := by intros; rfl
-  rightUnitor_naturality := by intros; rfl
-  pentagon := by intros; ext <;> rfl
-  triangle := by intros; ext <;> rfl
+instance : MonoidalCategory (CommAlgCat.{u} R) where
+    tensorObj S T := of R (S ⊗[R] T)
+    whiskerLeft _ {_ _} f := ofHom (Algebra.TensorProduct.map (.id _ _) f.hom)
+    whiskerRight {_ _} f T := ofHom (Algebra.TensorProduct.map f.hom (.id _ _))
+    tensorHom {_ _ _ _} f g := ofHom (map f.hom g.hom)
+    tensorUnit := .of R R
+    associator {_ _ _} := isoMk (Algebra.TensorProduct.assoc R R _ _ _)
+    leftUnitor _ := isoMk (Algebra.TensorProduct.lid R _)
+    rightUnitor _ := isoMk (Algebra.TensorProduct.rid R R _)
+    pentagon _ _ _ _ := sorry
+    triangle _ _ := sorry
+    associator_naturality _ _ _ := by ext <;> rfl
 
-instance : CartesianMonoidalCategory (CommAlgCat.{u} R)ᵒᵖ where
-  isTerminalTensorUnit := terminalOpOfInitial isInitialSelf
-  fst := _
-  snd := _
-  tensorProductIsBinaryProduct S T :=
-    BinaryCofan.IsColimit.op <| binaryCofanIsColimit (unop S) (unop T)
-  fst_def S T := by ext x; show x ⊗ₜ 1 = x ⊗ₜ algebraMap R (unop T:) 1; simp
-  snd_def S T := by ext x; show 1 ⊗ₜ x = algebraMap R (unop S:) 1 ⊗ₜ x; simp
+instance : CocartesianMonoidalCategory (CommAlgCat.{u} R) where
+  isInitialTensorUnit := isInitialSelf
+  inl := _
+  inr := _
+  tensorProductIsBinaryCoproduct S T := binaryCofanIsColimit S T
+  inl_def S T := by ext x; dsimp; show x ⊗ₜ 1 = x ⊗ₜ algebraMap R (T:) 1; simp
+  inr_def S T := by ext x; show 1 ⊗ₜ x = algebraMap R (S:) 1 ⊗ₜ x; simp
 
-instance : BraidedCategory (CommAlgCat.{u} R)ᵒᵖ where
-  braiding S T := .op <| isoMk (Algebra.TensorProduct.comm R _ _)
+instance : BraidedCategory (CommAlgCat.{u} R) where
+  braiding S T := isoMk (Algebra.TensorProduct.comm R _ _)
   braiding_naturality_right := by intros; ext <;> rfl
   braiding_naturality_left := by intros; ext <;> rfl
   hexagon_forward S T U := by ext <;> rfl
   hexagon_reverse S T U := by ext <;> rfl
 
-open MonoidalCategory
+open MonoidalCategory CocartesianMonoidalCategory
 
 variable {A B C D : (CommAlgCat.{u} R)ᵒᵖ}
 
@@ -127,6 +120,9 @@ variable {A B C D : (CommAlgCat.{u} R)ᵒᵖ}
 @[simp] lemma toUnit_unop_hom (A : (CommAlgCat R)ᵒᵖ) :
     (toUnit A).unop.hom = Algebra.ofId R A.unop := rfl
 
+@[simp] lemma fromUnit_hom (A : CommAlgCat R) :
+    (fromUnit A).hom = Algebra.ofId R A := rfl
+
 @[simp] lemma fst_unop_hom (A B : (CommAlgCat R)ᵒᵖ) :
     (fst A B).unop.hom = Algebra.TensorProduct.includeLeft := rfl
 
@@ -135,6 +131,16 @@ variable {A B C D : (CommAlgCat.{u} R)ᵒᵖ}
 
 @[simp] lemma lift_unop_hom (f : C ⟶ A) (g : C ⟶ B) :
     (lift f g).unop.hom = Algebra.TensorProduct.lift f.unop.hom g.unop.hom (fun _ _ ↦ .all _ _) :=
+  rfl
+
+@[simp] lemma inl_hom (A B : CommAlgCat R) :
+    (inl A B).hom = Algebra.TensorProduct.includeLeft := rfl
+
+@[simp] lemma inr_unop_hom (A B : CommAlgCat R) :
+    (inr A B).hom = Algebra.TensorProduct.includeRight := rfl
+
+@[simp] lemma desc_unop_hom {A B C: CommAlgCat R} (f : A ⟶ C) (g : B ⟶ C) :
+    (desc f g).hom = Algebra.TensorProduct.lift f.hom g.hom (fun _ _ ↦ .all _ _) :=
   rfl
 
 end CommAlgCat

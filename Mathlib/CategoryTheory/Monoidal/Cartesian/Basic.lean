@@ -65,11 +65,82 @@ class CartesianMonoidalCategory (C : Type u) [Category.{v} C] extends MonoidalCa
   fst_def (X Y : C) : fst X Y = X ◁ isTerminalTensorUnit.from Y ≫ (ρ_ X).hom := by aesop_cat
   snd_def (X Y : C) : snd X Y = isTerminalTensorUnit.from X ▷ Y ≫ (λ_ Y).hom := by aesop_cat
 
+-- class CocartesianMonoidalCategory (C : Type u) [Category.{v} C] [MonoidalCategory C ] where
+--   /-- The tensor unit is a terminal object. -/
+--   isInitialTensorUnit : IsInitial (𝟙_ C)
+--   /-- The first projection from the product. -/
+--   inl (X Y : C) : X ⟶ X ⊗ Y
+--   /-- The second projection from the product. -/
+--   inr (X Y : C) : Y ⟶ X ⊗ Y
+--   /-- The monoidal product is the categorical product. -/
+--   tensorProductIsBinaryProduct (X Y : C) : IsColimit <| BinaryCofan.mk (inl X Y) (inr X Y)
+--   inl_def (X Y : C) : inl X Y = (ρ_ X).inv ≫ X ◁ isInitialTensorUnit.to Y := by aesop_cat
+--   inr_def (X Y : C) : inr X Y = (λ_ Y).inv ≫ isInitialTensorUnit.to X ▷ Y := by aesop_cat
+--
 @[deprecated (since := "2025-05-15")] alias ChosenFiniteProducts := CartesianMonoidalCategory
+
+section
+
+class CocartesianMonoidalCategory (C : Type u) [Category.{v} C] extends MonoidalCategory C where
+  /-- The tensor unit is an initial object. -/
+  isInitialTensorUnit : IsInitial (𝟙_ C)
+  /-- The first injection to the coproduct. -/
+  inl (X Y : C) : X ⟶ X ⊗ Y
+  /-- The second injection to the coproduct. -/
+  inr (X Y : C) : Y ⟶ X ⊗ Y
+  /-- The monoidal product is the categorical product. -/
+  tensorProductIsBinaryCoproduct (X Y : C) : IsColimit <| BinaryCofan.mk (inl X Y) (inr X Y)
+  inl_def (X Y : C) : inl X Y = (ρ_ X).inv ≫ X ◁ isInitialTensorUnit.to Y := by aesop_cat
+  inr_def (X Y : C) : inr X Y = (λ_ Y).inv ≫ isInitialTensorUnit.to X ▷ Y := by aesop_cat
+
+instance CartesianMonoidalCategory.op (C : Type u)
+    [Category.{v} C] [CocartesianMonoidalCategory C] :
+    CartesianMonoidalCategory Cᵒᵖ where
+  isTerminalTensorUnit := terminalOpOfInitial CocartesianMonoidalCategory.isInitialTensorUnit
+  fst X Y := .op <| CocartesianMonoidalCategory.inl X.unop Y.unop
+  snd X Y := .op <| CocartesianMonoidalCategory.inr X.unop Y.unop
+  tensorProductIsBinaryProduct X Y := BinaryCofan.IsColimit.op <|
+    (CocartesianMonoidalCategory.tensorProductIsBinaryCoproduct X.unop Y.unop)
+  fst_def _ _ := Quiver.Hom.unop_inj <| CocartesianMonoidalCategory.inl_def _ _
+  snd_def _ _ := Quiver.Hom.unop_inj <| CocartesianMonoidalCategory.inr_def _ _
+-- def monoidalCategoryUnop : MonoidalCategory Cᴹᵒᵖ where
+--   tensorObj X Y := mop (unmop Y ⊗ unmop X)
+--   whiskerLeft X _ _ f := (f.unmop ▷ X.unmop).mop
+--   whiskerRight f X := (X.unmop ◁ f.unmop).mop
+--   tensorHom f g := (g.unmop ⊗ f.unmop).mop
+--   tensorHom_def _ _ := Quiver.Hom.unmop_inj (tensorHom_def' _ _)
+--   tensorUnit := mop (𝟙_ C)
+--   associator X Y Z := (α_ (unmop Z) (unmop Y) (unmop X)).symm.mop
+--   leftUnitor X := (ρ_ (unmop X)).mop
+--   rightUnitor X := (λ_ (unmop X)).mop
+--   associator_naturality f g h := Quiver.Hom.unmop_inj <| by simp
+--   leftUnitor_naturality f := Quiver.Hom.unmop_inj <| by simp
+--   rightUnitor_naturality f := Quiver.Hom.unmop_inj <| by simp
+--   -- Porting note: Changed `by coherence` to `by simp` below
+--   triangle X Y := Quiver.Hom.unmop_inj <| by simp
+--   pentagon W X Y Z := Quiver.Hom.unmop_inj <| by dsimp; monoidal_coherence
+--
+-- attribute [local instance] monoidalCategoryOp
+def CocartesianMonoidalCategory.op (C : Type u)
+    [Category.{v} C] [CartesianMonoidalCategory Cᵒᵖ] :
+    CocartesianMonoidalCategory C :=
+  { monoidalCategoryUnop with
+    isInitialTensorUnit := initialUnopOfTerminal CartesianMonoidalCategory.isTerminalTensorUnit
+    inl X Y := .unop <| CartesianMonoidalCategory.fst (Opposite.op X) (Opposite.op Y)
+    inr X Y := .unop <| CartesianMonoidalCategory.snd (Opposite.op X) (Opposite.op Y)
+    tensorProductIsBinaryCoproduct X Y := BinaryFan.IsLimit.unop <|
+      (CartesianMonoidalCategory.tensorProductIsBinaryProduct (Opposite.op X) (Opposite.op Y))
+    inl_def x y := Quiver.Hom.op_inj <|
+      CartesianMonoidalCategory.fst_def (Opposite.op x) (Opposite.op y)
+    inr_def x y := Quiver.Hom.op_inj <|
+      CartesianMonoidalCategory.snd_def (Opposite.op x) (Opposite.op y) }
+
+end
 
 namespace CartesianMonoidalCategory
 
 variable {C : Type u} [Category.{v} C]
+
 
 section OfChosenFiniteProducts
 variable (𝒯 : LimitCone (Functor.empty.{0} C)) (ℬ : ∀ X Y : C, LimitCone (pair X Y))
@@ -759,6 +830,54 @@ noncomputable def fullSubcategory (hP₀ : ClosedUnderLimitsOfShape (Discrete PE
   snd_def X Y := snd_def X.1 Y.1
 
 end CartesianMonoidalCategory
+
+namespace CocartesianMonoidalCategory
+
+variable {C : Type u} [Category.{v} C] [CocartesianMonoidalCategory C]
+
+@[ext 1050]
+lemma hom_ext {T X Y : C} (f g : X ⊗ Y ⟶ T)
+    (h_inl : inl _ _ ≫ f  = inl _ _ ≫ g)
+    (h_inr : inr _ _ ≫ f = inr _ _ ≫ g) :
+    f = g :=
+  BinaryCofan.IsColimit.hom_ext (tensorProductIsBinaryCoproduct X Y) h_inl h_inr
+
+/--
+The unique map to the terminal object.
+-/
+def fromUnit (X : C) : 𝟙_ C ⟶ X := isInitialTensorUnit.to _
+
+instance (X : C) : Unique (𝟙_ C ⟶ X) := isInitialEquivUnique _ _ isInitialTensorUnit _
+
+lemma default_eq_fromUnit (X : C) : default = fromUnit X := rfl
+
+/--
+This lemma follows from the preexisting `Unique` instance, but
+it is often convenient to use it directly as `apply toUnit_unique` forcing
+lean to do the necessary elaboration.
+-/
+@[ext]
+lemma toUnit_unique {X : C} (f g : 𝟙_ C ⟶ X) : f = g :=
+  Subsingleton.elim _ _
+
+@[reassoc (attr := simp)]
+theorem comp_toUnit {X Y : C} (f : X ⟶ Y) : fromUnit X ≫ f = fromUnit Y :=
+  toUnit_unique _ _
+
+/--
+Construct a morphism to the product given its two components.
+-/
+def desc {T X Y : C} (f : X ⟶ T) (g : Y ⟶ T) : X ⊗ Y ⟶ T :=
+  (BinaryCofan.IsColimit.desc' (tensorProductIsBinaryCoproduct X Y) f g).1
+
+@[reassoc (attr := simp)]
+lemma desc_inl {T X Y : C} (f : X ⟶ T) (g : Y ⟶ T) : inl _ _ ≫ desc f g = f :=
+  (BinaryCofan.IsColimit.desc' (tensorProductIsBinaryCoproduct X Y) f g).2.1
+
+@[reassoc (attr := simp)]
+lemma lift_snd {T X Y : C} (f : X ⟶ T) (g : Y ⟶ T) : inr _ _ ≫ desc f g = g :=
+  (BinaryCofan.IsColimit.desc' (tensorProductIsBinaryCoproduct X Y) f g).2.2
+end CocartesianMonoidalCategory
 
 open MonoidalCategory CartesianMonoidalCategory
 

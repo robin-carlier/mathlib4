@@ -143,6 +143,23 @@ instance {X Y : Cᴹᵒᵖ} (f : X ⟶ Y) [IsIso f] : IsIso f.unmop :=
 
 end IsIso
 
+open Opposite MonoidalCategory Functor LaxMonoidal OplaxMonoidal in
+def monoidalCategoryUnop [MonoidalCategory Cᵒᵖ] : MonoidalCategory C where
+  tensorObj X Y := unop (op X ⊗ op Y)
+  whiskerLeft X _ _ f := ((op X) ◁ f.op).unop
+  whiskerRight f X := (f.op ▷ (op X)).unop
+  tensorHom f g := (f.op ⊗ g.op).unop
+  tensorHom_def _ _ := Quiver.Hom.op_inj <| by simp [tensorHom_def']
+  tensorUnit := unop (𝟙_ Cᵒᵖ)
+  associator X Y Z := (α_ (op X) (op Y) (op Z)).symm.unop
+  leftUnitor X := (λ_ (op X)).symm.unop
+  rightUnitor X := (ρ_ (op X)).symm.unop
+  associator_naturality f g h := Quiver.Hom.op_inj <| by simp
+  leftUnitor_naturality f := Quiver.Hom.op_inj <| by simp
+  rightUnitor_naturality f := Quiver.Hom.op_inj <| by simp
+  triangle X Y := Quiver.Hom.op_inj <| by simp
+  pentagon W X Y Z := Quiver.Hom.op_inj <| by dsimp; monoidal_coherence
+
 variable [MonoidalCategory.{v₁} C]
 
 open Opposite MonoidalCategory Functor LaxMonoidal OplaxMonoidal
