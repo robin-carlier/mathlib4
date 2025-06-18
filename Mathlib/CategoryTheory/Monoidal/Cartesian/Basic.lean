@@ -65,18 +65,6 @@ class CartesianMonoidalCategory (C : Type u) [Category.{v} C] extends MonoidalCa
   fst_def (X Y : C) : fst X Y = X ◁ isTerminalTensorUnit.from Y ≫ (ρ_ X).hom := by aesop_cat
   snd_def (X Y : C) : snd X Y = isTerminalTensorUnit.from X ▷ Y ≫ (λ_ Y).hom := by aesop_cat
 
--- class CocartesianMonoidalCategory (C : Type u) [Category.{v} C] [MonoidalCategory C ] where
---   /-- The tensor unit is a terminal object. -/
---   isInitialTensorUnit : IsInitial (𝟙_ C)
---   /-- The first projection from the product. -/
---   inl (X Y : C) : X ⟶ X ⊗ Y
---   /-- The second projection from the product. -/
---   inr (X Y : C) : Y ⟶ X ⊗ Y
---   /-- The monoidal product is the categorical product. -/
---   tensorProductIsBinaryProduct (X Y : C) : IsColimit <| BinaryCofan.mk (inl X Y) (inr X Y)
---   inl_def (X Y : C) : inl X Y = (ρ_ X).inv ≫ X ◁ isInitialTensorUnit.to Y := by aesop_cat
---   inr_def (X Y : C) : inr X Y = (λ_ Y).inv ≫ isInitialTensorUnit.to X ▷ Y := by aesop_cat
---
 @[deprecated (since := "2025-05-15")] alias ChosenFiniteProducts := CartesianMonoidalCategory
 
 section
@@ -103,24 +91,7 @@ instance CartesianMonoidalCategory.op (C : Type u)
     (CocartesianMonoidalCategory.tensorProductIsBinaryCoproduct X.unop Y.unop)
   fst_def _ _ := Quiver.Hom.unop_inj <| CocartesianMonoidalCategory.inl_def _ _
   snd_def _ _ := Quiver.Hom.unop_inj <| CocartesianMonoidalCategory.inr_def _ _
--- def monoidalCategoryUnop : MonoidalCategory Cᴹᵒᵖ where
---   tensorObj X Y := mop (unmop Y ⊗ unmop X)
---   whiskerLeft X _ _ f := (f.unmop ▷ X.unmop).mop
---   whiskerRight f X := (X.unmop ◁ f.unmop).mop
---   tensorHom f g := (g.unmop ⊗ f.unmop).mop
---   tensorHom_def _ _ := Quiver.Hom.unmop_inj (tensorHom_def' _ _)
---   tensorUnit := mop (𝟙_ C)
---   associator X Y Z := (α_ (unmop Z) (unmop Y) (unmop X)).symm.mop
---   leftUnitor X := (ρ_ (unmop X)).mop
---   rightUnitor X := (λ_ (unmop X)).mop
---   associator_naturality f g h := Quiver.Hom.unmop_inj <| by simp
---   leftUnitor_naturality f := Quiver.Hom.unmop_inj <| by simp
---   rightUnitor_naturality f := Quiver.Hom.unmop_inj <| by simp
---   -- Porting note: Changed `by coherence` to `by simp` below
---   triangle X Y := Quiver.Hom.unmop_inj <| by simp
---   pentagon W X Y Z := Quiver.Hom.unmop_inj <| by dsimp; monoidal_coherence
---
--- attribute [local instance] monoidalCategoryOp
+
 def CocartesianMonoidalCategory.op (C : Type u)
     [Category.{v} C] [CartesianMonoidalCategory Cᵒᵖ] :
     CocartesianMonoidalCategory C :=
