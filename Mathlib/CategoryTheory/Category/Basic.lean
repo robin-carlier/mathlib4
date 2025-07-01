@@ -174,6 +174,8 @@ class Category (obj : Type u) : Type max u (v + 1) extends CategoryStruct.{v} ob
     aesop_cat
 
 attribute [simp] Category.id_comp Category.comp_id Category.assoc
+attribute [grind _=_] Category.assoc
+attribute [grind =] Category.comp_id Category.id_comp
 attribute [trans] CategoryStruct.comp
 
 example {C} [Category C] {X Y : C} (f : X ⟶ Y) : 𝟙 X ≫ f = f := by simp
@@ -238,18 +240,18 @@ theorem id_of_comp_right_id (f : X ⟶ X) (w : ∀ {Y : C} (g : Y ⟶ X), g ≫ 
   simp
 
 theorem comp_ite {P : Prop} [Decidable P] {X Y Z : C} (f : X ⟶ Y) (g g' : Y ⟶ Z) :
-    (f ≫ if P then g else g') = if P then f ≫ g else f ≫ g' := by aesop
+    (f ≫ if P then g else g') = if P then f ≫ g else f ≫ g' := by grind
 
 theorem ite_comp {P : Prop} [Decidable P] {X Y Z : C} (f f' : X ⟶ Y) (g : Y ⟶ Z) :
-    (if P then f else f') ≫ g = if P then f ≫ g else f' ≫ g := by aesop
+    (if P then f else f') ≫ g = if P then f ≫ g else f' ≫ g := by grind
 
 theorem comp_dite {P : Prop} [Decidable P]
     {X Y Z : C} (f : X ⟶ Y) (g : P → (Y ⟶ Z)) (g' : ¬P → (Y ⟶ Z)) :
-    (f ≫ if h : P then g h else g' h) = if h : P then f ≫ g h else f ≫ g' h := by aesop
+    (f ≫ if h : P then g h else g' h) = if h : P then f ≫ g h else f ≫ g' h := by grind
 
 theorem dite_comp {P : Prop} [Decidable P]
     {X Y Z : C} (f : P → (X ⟶ Y)) (f' : ¬P → (X ⟶ Y)) (g : Y ⟶ Z) :
-    (if h : P then f h else f' h) ≫ g = if h : P then f h ≫ g else f' h ≫ g := by aesop
+    (if h : P then f h else f' h) ≫ g = if h : P then f h ≫ g else f' h ≫ g := by grind
 
 /-- A morphism `f` is an epimorphism if it can be cancelled when precomposed:
 `f ≫ g = f ≫ h` implies `g = h`. -/
@@ -265,39 +267,41 @@ class Mono (f : X ⟶ Y) : Prop where
   /-- A morphism `f` is a monomorphism if it can be cancelled when postcomposed. -/
   right_cancellation : ∀ {Z : C} (g h : Z ⟶ X), g ≫ f = h ≫ f → g = h
 
+attribute [grind →] Epi.left_cancellation
+attribute [grind →] Mono.right_cancellation
+
 instance (X : C) : Epi (𝟙 X) :=
   ⟨fun g h w => by aesop⟩
 
 instance (X : C) : Mono (𝟙 X) :=
   ⟨fun g h w => by aesop⟩
 
-theorem cancel_epi (f : X ⟶ Y) [Epi f] {g h : Y ⟶ Z} : f ≫ g = f ≫ h ↔ g = h :=
-  ⟨fun p => Epi.left_cancellation g h p, congr_arg _⟩
+theorem cancel_epi (f : X ⟶ Y) [Epi f] {g h : Y ⟶ Z} : f ≫ g = f ≫ h ↔ g = h := by
+  grind
 
 theorem cancel_epi_assoc_iff (f : X ⟶ Y) [Epi f] {g h : Y ⟶ Z} {W : C} {k l : Z ⟶ W} :
-    (f ≫ g) ≫ k = (f ≫ h) ≫ l ↔ g ≫ k = h ≫ l :=
-  ⟨fun p => (cancel_epi f).1 <| by simpa using p, fun p => by simp only [Category.assoc, p]⟩
+    (f ≫ g) ≫ k = (f ≫ h) ≫ l ↔ g ≫ k = h ≫ l := by
+  grind
 
-theorem cancel_mono (f : X ⟶ Y) [Mono f] {g h : Z ⟶ X} : g ≫ f = h ≫ f ↔ g = h :=
-  -- Porting note: in Lean 3 we could just write `congr_arg _` here.
-  ⟨fun p => Mono.right_cancellation g h p, congr_arg (fun k => k ≫ f)⟩
+theorem cancel_mono (f : X ⟶ Y) [Mono f] {g h : Z ⟶ X} : g ≫ f = h ≫ f ↔ g = h := by
+  grind
 
 theorem cancel_mono_assoc_iff (f : X ⟶ Y) [Mono f] {g h : Z ⟶ X} {W : C} {k l : W ⟶ Z} :
-    k ≫ (g ≫ f) = l ≫ (h ≫ f) ↔ k ≫ g = l ≫ h :=
-  ⟨fun p => (cancel_mono f).1 <| by simpa using p, fun p => by simp only [← Category.assoc, p]⟩
+    k ≫ (g ≫ f) = l ≫ (h ≫ f) ↔ k ≫ g = l ≫ h := by
+  grind
 
 theorem cancel_epi_id (f : X ⟶ Y) [Epi f] {h : Y ⟶ Y} : f ≫ h = f ↔ h = 𝟙 Y := by
   convert cancel_epi f
-  simp
+  grind
 
 theorem cancel_mono_id (f : X ⟶ Y) [Mono f] {g : X ⟶ X} : g ≫ f = f ↔ g = 𝟙 X := by
   convert cancel_mono f
-  simp
+  grind
 
 /-- The composition of epimorphisms is again an epimorphism. This version takes `Epi f` and `Epi g`
 as typeclass arguments. For a version taking them as explicit arguments, see `epi_comp'`. -/
-instance epi_comp {X Y Z : C} (f : X ⟶ Y) [Epi f] (g : Y ⟶ Z) [Epi g] : Epi (f ≫ g) :=
-  ⟨fun _ _ w => (cancel_epi g).1 <| (cancel_epi_assoc_iff f).1 w⟩
+instance epi_comp {X Y Z : C} (f : X ⟶ Y) [Epi f] (g : Y ⟶ Z) [Epi g] : Epi (f ≫ g) := by
+  grind [Epi]
 
 /-- The composition of epimorphisms is again an epimorphism. This version takes `Epi f` and `Epi g`
 as explicit arguments. For a version taking them as typeclass arguments, see `epi_comp`. -/
@@ -307,8 +311,8 @@ theorem epi_comp' {X Y Z : C} {f : X ⟶ Y} {g : Y ⟶ Z} (hf : Epi f) (hg : Epi
 /-- The composition of monomorphisms is again a monomorphism. This version takes `Mono f` and
 `Mono g` as typeclass arguments. For a version taking them as explicit arguments, see `mono_comp'`.
 -/
-instance mono_comp {X Y Z : C} (f : X ⟶ Y) [Mono f] (g : Y ⟶ Z) [Mono g] : Mono (f ≫ g) :=
-  ⟨fun _ _ w => (cancel_mono f).1 <| (cancel_mono_assoc_iff g).1 w⟩
+instance mono_comp {X Y Z : C} (f : X ⟶ Y) [Mono f] (g : Y ⟶ Z) [Mono g] : Mono (f ≫ g) := by
+  grind [Mono]
 
 /-- The composition of monomorphisms is again a monomorphism. This version takes `Mono f` and
 `Mono g` as explicit arguments. For a version taking them as typeclass arguments, see `mono_comp`.
@@ -318,14 +322,14 @@ theorem mono_comp' {X Y Z : C} {f : X ⟶ Y} {g : Y ⟶ Z} (hf : Mono f) (hg : M
   inferInstance
 
 theorem mono_of_mono {X Y Z : C} (f : X ⟶ Y) (g : Y ⟶ Z) [Mono (f ≫ g)] : Mono f :=
-  ⟨fun _ _ w => (cancel_mono (f ≫ g)).1 <| by simp only [← Category.assoc, w]⟩
+  ⟨fun _ _ w => (cancel_mono (f ≫ g)).1 <| by grind⟩
 
 theorem mono_of_mono_fac {X Y Z : C} {f : X ⟶ Y} {g : Y ⟶ Z} {h : X ⟶ Z} [Mono h]
     (w : f ≫ g = h) : Mono f := by
   subst h; exact mono_of_mono f g
 
 theorem epi_of_epi {X Y Z : C} (f : X ⟶ Y) (g : Y ⟶ Z) [Epi (f ≫ g)] : Epi g :=
-  ⟨fun _ _ w => (cancel_epi (f ≫ g)).1 <| by simp only [Category.assoc, w]⟩
+  ⟨fun _ _ w => (cancel_epi (f ≫ g)).1 <| by grind⟩
 
 theorem epi_of_epi_fac {X Y Z : C} {f : X ⟶ Y} {g : Y ⟶ Z} {h : X ⟶ Z} [Epi h]
     (w : f ≫ g = h) : Epi g := by

@@ -52,16 +52,17 @@ structure NatTrans (F G : C ⥤ D) : Type max u₁ v₂ where
 -- Rather arbitrarily, we say that the 'simpler' form is
 -- components of natural transformations moving earlier.
 attribute [reassoc (attr := simp)] NatTrans.naturality
+attribute [grind _=_] NatTrans.naturality
 
 theorem congr_app {F G : C ⥤ D} {α β : NatTrans F G} (h : α = β) (X : C) : α.app X = β.app X := by
-  aesop_cat
+  grind
 
 namespace NatTrans
 
 /-- `NatTrans.id F` is the identity natural transformation on a functor `F`. -/
 protected def id (F : C ⥤ D) : NatTrans F F where app X := 𝟙 (F.obj X)
 
-@[simp]
+@[simp, grind =]
 theorem id_app' (F : C ⥤ D) (X : C) : (NatTrans.id F).app X = 𝟙 (F.obj X) := rfl
 
 instance (F : C ⥤ D) : Inhabited (NatTrans F F) := ⟨NatTrans.id F⟩
