@@ -174,9 +174,10 @@ class Category (obj : Type u) : Type max u (v + 1) extends CategoryStruct.{v} ob
     aesop_cat
 
 attribute [simp] Category.id_comp Category.comp_id Category.assoc
-attribute [grind _=_] Category.assoc
-attribute [grind =] Category.comp_id Category.id_comp
 attribute [trans] CategoryStruct.comp
+
+attribute [grind =] Category.comp_id Category.id_comp
+attribute [grind _=_] Category.assoc
 
 example {C} [Category C] {X Y : C} (f : X ⟶ Y) : 𝟙 X ≫ f = f := by simp
 example {C} [Category C] {X Y : C} (f : X ⟶ Y) : f ≫ 𝟙 Y = f := by simp
