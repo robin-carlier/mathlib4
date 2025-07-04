@@ -134,11 +134,15 @@ allows `aesop` to look through semireducible definitions when calling `intros`.
 This tactic fails when it is unable to solve the goal, making it suitable for
 use in auto-params.
 -/
-macro (name := aesop_cat) "aesop_cat" c:Aesop.tactic_clause* : tactic =>
+-- macro (name := aesop_cat) "aesop_cat" c:Aesop.tactic_clause* : tactic =>
+-- `(tactic|
+--   first | sorry_if_sorry | rfl_cat |
+macro (name := aesop_cat) "aesop_cat" _c:Aesop.tactic_clause* : tactic =>
 `(tactic|
-  first | sorry_if_sorry | rfl_cat |
-  aesop $c* (config := { introsTransparency? := some .default, terminal := true })
-            (rule_sets := [$(Lean.mkIdent `CategoryTheory):ident]))
+  first
+    | sorry_if_sorry
+    | rfl_cat
+    | intros; (try dsimp only) <;> ((try ext); grind (gen := 20) (ematch := 20)))
 
 /--
 We also use `aesop_cat?` to pass along a `Try this` suggestion when using `aesop_cat`

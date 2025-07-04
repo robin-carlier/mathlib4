@@ -84,10 +84,10 @@ instance : Inhabited (C ⥤ C) :=
 
 variable {C}
 
-@[simp]
+@[simp, grind =]
 theorem id_obj (X : C) : (𝟭 C).obj X = X := rfl
 
-@[simp]
+@[simp, grind =]
 theorem id_map {X Y : C} (f : X ⟶ Y) : (𝟭 C).map f = f := rfl
 
 end
@@ -103,14 +103,16 @@ variable {C : Type u₁} [Category.{v₁} C] {D : Type u₂} [Category.{v₂} D]
 def comp (F : C ⥤ D) (G : D ⥤ E) : C ⥤ E where
   obj X := G.obj (F.obj X)
   map f := G.map (F.map f)
-  map_comp := by grind
 
 /-- Notation for composition of functors. -/
 scoped [CategoryTheory] infixr:80 " ⋙ " => Functor.comp
 
-@[simp, grind _=_]
+@[simp]
 theorem comp_map (F : C ⥤ D) (G : D ⥤ E) {X Y : C} (f : X ⟶ Y) :
     (F ⋙ G).map f = G.map (F.map f) := rfl
+
+attribute [grind =] comp_obj
+attribute [grind =] comp_map
 
 -- These are not simp lemmas because rewriting along equalities between functors
 -- is not necessarily a good idea.
@@ -123,7 +125,7 @@ protected theorem id_comp (F : C ⥤ D) : 𝟭 C ⋙ F = F := by cases F; rfl
 theorem map_dite (F : C ⥤ D) {X Y : C} {P : Prop} [Decidable P]
     (f : P → (X ⟶ Y)) (g : ¬P → (X ⟶ Y)) :
     F.map (if h : P then f h else g h) = if h : P then F.map (f h) else F.map (g h) := by
-  grind
+  aesop_cat
 
 @[simp]
 theorem toPrefunctor_comp (F : C ⥤ D) (G : D ⥤ E) :

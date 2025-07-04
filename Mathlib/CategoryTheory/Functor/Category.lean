@@ -39,6 +39,7 @@ variable {C D} {E : Type u₃} [Category.{v₃} E]
 variable {E' : Type u₄} [Category.{v₄} E']
 variable {F G H I : C ⥤ D}
 
+attribute [local grind =] NatTrans.vcomp_app in
 /-- `Functor.category C D` gives the category structure on functors and natural transformations
 between categories `C` and `D`.
 
@@ -54,12 +55,13 @@ instance Functor.category : Category.{max u₁ v₂} (C ⥤ D) where
 
 namespace NatTrans
 
-@[ext, grind ext]
+@[ext]
 theorem ext' {α β : F ⟶ G} (w : α.app = β.app) : α = β := NatTrans.ext w
 
-@[simp, grind =]
+@[simp]
 theorem vcomp_eq_comp (α : F ⟶ G) (β : G ⟶ H) : vcomp α β = α ≫ β := rfl
 
+@[grind _=_]
 theorem vcomp_app' (α : F ⟶ G) (β : G ⟶ H) (X : C) : (α ≫ β).app X = α.app X ≫ β.app X := rfl
 
 theorem congr_app {α β : F ⟶ G} (h : α = β) (X : C) : α.app X = β.app X := by rw [h]
@@ -112,8 +114,8 @@ lemma id_comm (α β : (𝟭 C) ⟶ (𝟭 C)) : α ≫ β = β ≫ α := by
 @[simps]
 def hcomp {H I : D ⥤ E} (α : F ⟶ G) (β : H ⟶ I) : F ⋙ H ⟶ G ⋙ I where
   app := fun X : C => β.app (F.obj X) ≫ I.map (α.app X)
-  naturality X Y f := by
-    grind
+
+attribute [grind =] hcomp_app
 
 /-- Notation for horizontal composition of natural transformations. -/
 infixl:80 " ◫ " => hcomp
@@ -129,7 +131,7 @@ theorem id_hcomp_app {H : E ⥤ C} (α : F ⟶ G) (X : E) : (𝟙 H ◫ α).app 
 -- but relying on the definitional equality causes bad problems with elaboration later.)
 theorem exchange {I J K : D ⥤ E} (α : F ⟶ G) (β : G ⟶ H) (γ : I ⟶ J) (δ : J ⟶ K) :
     (α ≫ β) ◫ (γ ≫ δ) = (α ◫ γ) ≫ β ◫ δ := by
-  aesop_cat
+  ext; grind
 
 end NatTrans
 
@@ -143,6 +145,7 @@ protected def flip (F : C ⥤ D ⥤ E) : D ⥤ C ⥤ E where
       map := fun f => (F.map f).app k, }
   map f := { app := fun j => (F.obj j).map f }
 
+attribute [grind =] flip_obj_obj flip_obj_map flip_obj_map flip_map_app
 
 /-- The left unitor, a natural isomorphism `((𝟭 _) ⋙ F) ≅ F`.
 -/
@@ -193,12 +196,12 @@ namespace Iso
 @[reassoc (attr := simp)]
 theorem map_hom_inv_id_app {X Y : C} (e : X ≅ Y) (F : C ⥤ D ⥤ E) (Z : D) :
     (F.map e.hom).app Z ≫ (F.map e.inv).app Z = 𝟙 _ := by
-  simp [← NatTrans.comp_app, ← Functor.map_comp]
+  grind
 
 @[reassoc (attr := simp)]
 theorem map_inv_hom_id_app {X Y : C} (e : X ≅ Y) (F : C ⥤ D ⥤ E) (Z : D) :
     (F.map e.inv).app Z ≫ (F.map e.hom).app Z = 𝟙 _ := by
-  simp [← NatTrans.comp_app, ← Functor.map_comp]
+  grind
 
 end Iso
 

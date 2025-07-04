@@ -55,7 +55,7 @@ structure Iso {C : Type u} [Category.{v} C] (X Y : C) where
   is the identity on the target. -/
   inv_hom_id : inv ≫ hom = 𝟙 Y := by aesop_cat
 
-attribute [reassoc (attr := simp)] Iso.hom_inv_id Iso.inv_hom_id
+attribute [reassoc (attr := simp), grind =] Iso.hom_inv_id Iso.inv_hom_id
 
 /-- Notation for an isomorphism in a category. -/
 infixr:10 " ≅ " => Iso -- type as \cong or \iso
@@ -73,9 +73,9 @@ theorem ext ⦃α β : X ≅ Y⦄ (w : α.hom = β.hom) : α = β :=
     cases this
     rfl
   calc
-    α.inv = α.inv ≫ β.hom ≫ β.inv   := by rw [Iso.hom_inv_id, Category.comp_id]
-    _     = (α.inv ≫ α.hom) ≫ β.inv := by rw [Category.assoc, ← w]
-    _     = β.inv                    := by rw [Iso.inv_hom_id, Category.id_comp]
+    α.inv = α.inv ≫ β.hom ≫ β.inv   := by grind
+    _     = (α.inv ≫ α.hom) ≫ β.inv := by grind
+    _     = β.inv                    := by grind
 
 /-- Inverse isomorphism. -/
 @[symm]
@@ -206,6 +206,8 @@ theorem hom_eq_inv (α : X ≅ Y) (β : Y ≅ X) : α.hom = β.inv ↔ β.hom = 
   rw [← symm_inv, inv_eq_inv α.symm β, eq_comm]
   rfl
 
+attribute [grind] Function.LeftInverse Function.RightInverse
+
 /-- The bijection `(Z ⟶ X) ≃ (Z ⟶ Y)` induced by `α : X ≅ Y`. -/
 @[simps]
 def homToEquiv (α : X ≅ Y) {Z : C} : (Z ⟶ X) ≃ (Z ⟶ Y) where
@@ -236,11 +238,11 @@ noncomputable def inv (f : X ⟶ Y) [I : IsIso f] : Y ⟶ X :=
 
 namespace IsIso
 
-@[simp]
+@[simp, grind =]
 theorem hom_inv_id (f : X ⟶ Y) [I : IsIso f] : f ≫ inv f = 𝟙 X :=
   (Classical.choose_spec I.1).left
 
-@[simp]
+@[simp, grind =]
 theorem inv_hom_id (f : X ⟶ Y) [I : IsIso f] : inv f ≫ f = 𝟙 Y :=
   (Classical.choose_spec I.1).right
 
@@ -344,34 +346,32 @@ explicit, to make this easier to use with the `refine` tactic, for instance.
 -/
 lemma comp_isIso' (_ : IsIso f) (_ : IsIso h) : IsIso (f ≫ h) := inferInstance
 
+attribute [grind ←=] inv_eq_of_hom_inv_id
+attribute [grind ←=] inv_eq_of_inv_hom_id
+
 @[simp]
 theorem inv_id : inv (𝟙 X) = 𝟙 X := by
-  apply inv_eq_of_hom_inv_id
-  simp
+  grind
 
 @[simp, reassoc]
 theorem inv_comp [IsIso f] [IsIso h] : inv (f ≫ h) = inv h ≫ inv f := by
-  apply inv_eq_of_hom_inv_id
-  simp
+  grind (ematch := 20)
 
 @[simp]
 theorem inv_inv [IsIso f] : inv (inv f) = f := by
-  apply inv_eq_of_hom_inv_id
-  simp
+  grind
 
-@[simp]
+@[simp, grind =]
 theorem Iso.inv_inv (f : X ≅ Y) : inv f.inv = f.hom := by
-  apply inv_eq_of_hom_inv_id
-  simp
+  grind
 
-@[simp]
+@[simp, grind =]
 theorem Iso.inv_hom (f : X ≅ Y) : inv f.hom = f.inv := by
-  apply inv_eq_of_hom_inv_id
-  simp
+  grind
 
 @[simp]
-theorem inv_comp_eq (α : X ⟶ Y) [IsIso α] {f : X ⟶ Z} {g : Y ⟶ Z} : inv α ≫ f = g ↔ f = α ≫ g :=
-  (asIso α).inv_comp_eq
+theorem inv_comp_eq (α : X ⟶ Y) [IsIso α] {f : X ⟶ Z} {g : Y ⟶ Z} : inv α ≫ f = g ↔ f = α ≫ g := by
+  grind
 
 @[simp]
 theorem eq_inv_comp (α : X ⟶ Y) [IsIso α] {f : X ⟶ Z} {g : Y ⟶ Z} : g = inv α ≫ f ↔ α ≫ g = f :=
