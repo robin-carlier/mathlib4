@@ -50,7 +50,6 @@ is is indeed naturaly isomorphic to
 `tupleEquivFunctorHomFunctor` near the end of this file.
 
 -/
-
 universe v u
 
 namespace CategoryTheory.MonoidalCategory
@@ -1038,6 +1037,16 @@ def tupleEquivFunctorHomFunctor : ∀ (n : ℕ),
           Category.id_comp, whiskerLeft_comp, id_whiskerRight, Category.assoc]
         simp [this, ← whisker_exchange_assoc, ← whisker_exchange,
           tensorProdFunctor, tensorHom_def, ← whisker_exchange])
+
+
+def whiskerComposeComp {n m l : ℕ} (Φ : Fin (n + 1) ⥤ Fin (m + 1))
+    (Ψ : Fin (m + 1) ⥤ Fin (l + 1)) :
+    whiskerLeftFunctor (C := C) (Φ ⋙ Ψ) ≅ whiskerLeftFunctor Ψ ⋙ whiskerLeftFunctor Φ :=
+  .refl _
+
+def whiskerComposeId {n : ℕ} :
+    whiskerLeftFunctor (C := C) (𝟭 (Fin (n + 1))) ≅ 𝟭 _ :=
+  .refl _
 
 end CoherentTensorFamily
 
