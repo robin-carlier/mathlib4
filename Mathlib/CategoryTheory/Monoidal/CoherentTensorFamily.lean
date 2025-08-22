@@ -19,35 +19,51 @@ In this file, we construct an `n`-ary tensor product functor
 `tensorProdFunctor : (Fin (n + 1) → C) ⥤ C`, which takes
 an n-uple `(x₀, x₁, x₂, …, xₙ)` to `x₀ ⊗ x₁ ⊗ ⋯ ⊗ xₙ`. This functor
 is recursively defined, and thus does not have very good defeqs and
-is hard to work with in general, in general,
-though it does have nice defeqs for small explicit values of `n`.
+is hard to work with in general.
+It does have nice defeqs for small explicit values of `n`.
 
 The bulk of this file deals with the fact that
 this construction is in fact functorial with respect to
 functors `Fin (n + 1) ⥤ Fin (m + 1)`: informally, a functor
 `Φ : Fin (n + 1) ⥤ Fin (m + 1)` will transform
 `x₀ ⊗ ⋯ ⊗ xᵢ ⊗ ⋯ ⊗ xₘ` to the tensor product of the
-xⱼ for `j ∈ Φ⁻¹ {i}`. The core difficulty here is that one
-needs to deal with the fact that the expressions gets reassociated in
-this description; the inductive definition of `tensorProdFunctor` is
+xⱼ for `j ∈ Φ⁻¹ {i}`.
+
+The core difficulties here is that one needs to deal with the fact that
+1. The expressions gets reassociated in this description
+2. A direct definition of these transformations will run into non-definitional
+  equalities of objects.
+
+The inductive definition of `tensorProdFunctor` is
 very badly suited for this kind of manipulations.
 
-To deal with this problem, we introduce a construction `CoherentTensorFamily C n`,
-which is a model with better defeq for pseudofunctors from
-`LocallyDiscrete (Fin (n + 1))` to `MonoidalSingleObj C`: such data
-consists of families of objects of `c` indexed by inequalities `i ≤ j`,
-with extra coherence isomorphisms of the form `c i j ⊗ c j k ≅ c i k` added
-for `i ≤ j ≤ k`: these family have good functoriality properies with respect
+To deal with this problem, we introduce a construction
+`CoherentTensorFamily C n`, which is a model, with better defeqs,
+for pseudofunctors from `LocallyDiscrete (Fin (n + 1))` to
+`MonoidalSingleObj C`: such data consists of families of objects of
+`c` indexed by inequalities `i ≤ j`, with extra coherence isomorphisms of the form
+`c i j ⊗ c j k ≅ c i k` added for `i ≤ j ≤ k`.
+Coherent families have good contravariant functoriality properties with respect
 to functors `Φ : Fin (n + 1) ⥤ Fin (m + 1)`, which intuitively corresponds
-here with precomposition of pseudofunctors.
+here with precomposition of pseudofunctors, and assemble into a pseudofunctor
+(in fact, strict functor) from the opposite of the simplex category to `Cat`.
 
 We then inductively construct an equivalene of categories
 `CoherentTensorFamily C n ≌ Fin n ⟶ C`, and show that
 through the identification `CoherentTensorFamily C 1 ≌ C`, the operation
 `CoherentTensorFamily C n ⥤ C` that sends a family `i, j ↦ c i j` to `c 0 n`
 is is indeed naturaly isomorphic to
-`tensorProdFunctor : (Fin (n + 1) → C) ⥤ C`: this is the isomorphism
+`tensorProdFunctor : Fin (n + 1) → C ⥤ C`: this is the isomorphism
 `tupleEquivFunctorHomFunctor` near the end of this file.
+
+For now, we content ourselves with this contravariant descripton: this is
+not exactly the functoriality described at the beggining of this
+docstring (which is covariant): note that how, in the first description,
+the tensor product corresponds to the unique functor `σ 0 : Fin 2 ⥤ Fin 1`;
+In our description via `CoherentTensorFamily`, the tensor product corresponds to
+`δ 1 : Fin 2 ⥤ Fin 3`. The covariant version of what we did will be
+obtained after precomposition with the functor `II : SimplexCategory ⥤ SimplexCategoryᵒᵖ`
+from PR #21766.
 
 -/
 universe v u
