@@ -523,3 +523,126 @@ theorem Equiv.Perm.prod_Ioi_comp_eq_sign_mul_prod {R : Type*} [CommRing R]
   apply Finset.prod_comm' (by simp)
 
 end Sign
+
+section inversionNumber
+
+namespace Fin
+
+-- Perhaps these should be global annotations?
+attribute [local grind =] Equiv.Perm.mul_apply Equiv.Perm.one_apply
+
+variable {n : ℕ}
+
+abbrev inversionSet (σ : Equiv.Perm (Fin n)) : Finset (Fin n × Fin n) :=
+   { i | i.1 < i.2 ∧ σ i.1 > σ i.2 }
+
+local prefix:100 "ℐ " => Fin.inversionSet
+
+def inversionNumber (σ : Equiv.Perm (Fin n)) : ℕ :=
+  Finset.card <| ℐ σ
+
+local prefix:100 "ι " => Fin.inversionNumber
+
+local notation "Ψ " x:max => Equiv.swap (Fin.castSucc x) (Fin.succ x)
+
+private lemma inversionSet_mul_swap_castSucc_succ_eq_of_le
+    (σ : Equiv.Perm (Fin (n + 1))) (i : Fin n) (hi : σ i.castSucc < σ i.succ) :
+    ℐ (σ * Ψ i) = Finset.image (Equiv.prodCongr (Ψ i) (Ψ i)) (ℐ σ) ∪ {(i.castSucc, i.succ)} := by
+  let τ : Equiv.Perm (Fin (n + 1) × Fin (n + 1)) :=
+    Equiv.prodCongr (Ψ i) (Ψ i)
+  have not_mem : ⟨i.castSucc, i.succ⟩ ∉ Fin.inversionSet σ := by grind
+  -- Then, it is an inversion in the next :
+  have mem : ⟨i.castSucc, i.succ⟩ ∈
+      Fin.inversionSet (σ * (Equiv.swap i.succ i.castSucc)) := by simpa
+  have : Finset.image τ (ℐ σ) ⊆
+      Fin.inversionSet (σ * Ψ i) := by
+    simp only [Equiv.prodCongr_apply, Finset.subset_iff, Finset.mem_image, Finset.mem_filter,
+      Finset.mem_univ, gt_iff_lt, true_and, Prod.exists, Prod.map_apply, Equiv.Perm.coe_mul,
+      Function.comp_apply, forall_exists_index, and_imp, Prod.forall, Prod.mk.injEq, τ]
+    intro a b a' b' hab hsab _ _
+    grind [Fin.lt_def, Fin.val_succ, Fin.coe_castSucc]
+  have (i₀ j₀ : Fin (n + 1)) (hij₀ : (i₀, j₀) ∈ ℐ (σ * Ψ i)) :
+      ((i₀, j₀) ∈ Finset.image τ (ℐ σ) ∨ (i₀, j₀) = (i.castSucc, i.succ)) := by
+    simp only [Finset.mem_filter, Finset.mem_univ, Equiv.Perm.coe_mul, Function.comp_apply,
+      gt_iff_lt, true_and] at hij₀
+    obtain ⟨hij₀, hσij₀⟩ := hij₀
+    simp only [Equiv.prodCongr_apply, Finset.mem_image, Finset.mem_filter, Finset.mem_univ,
+      gt_iff_lt, true_and, Prod.exists, Prod.map_apply, Prod.mk.injEq, τ]
+    by_cases h : i₀ = i.castSucc
+    · subst h
+      grind [Fin.lt_def, Fin.val_succ, Fin.coe_castSucc]
+    · by_cases h : j₀ = i.succ
+      · subst h
+        left
+        use i₀, i.castSucc
+        grind [Fin.lt_def, Fin.val_succ, Fin.coe_castSucc]
+      · left
+        by_cases h : j₀ = i.castSucc
+        · have : i₀ ≠ i.succ := by grind [Fin.lt_def, Fin.val_succ, Fin.coe_castSucc]
+          subst h
+          rw [Equiv.swap_apply_left, Equiv.swap_apply_of_ne_of_ne (by grind) (by grind)] at hσij₀
+          use i₀, i.succ
+          grind
+        · grind [Fin.lt_def, Fin.val_succ, Fin.coe_castSucc, Equiv.swap_apply_of_ne_of_ne]
+  grind
+
+lemma inversionNumber_mul_swap_castSucc_succ_eq_of_le (σ : Equiv.Perm (Fin (n + 1))) (i : Fin n)
+    (h : σ i.castSucc < σ i.succ) :
+    ι (σ * (Ψ i)) = (ι σ) + 1 := by
+  have not_mem : ⟨i.castSucc, i.succ⟩ ∉ Fin.inversionSet σ := by
+    grind
+  -- Then, it is an inversion in the next:
+  have mem : ⟨i.castSucc, i.succ⟩ ∈
+      Fin.inversionSet (σ * (Equiv.swap i.succ i.castSucc)) := by
+    simpa
+  have := congr(Finset.card $(inversionSet_mul_swap_castSucc_succ_eq_of_le σ i h))
+  rw [Finset.card_union_of_disjoint] at this
+  · simp only [Equiv.prodCongr_apply, Finset.card_singleton] at this
+    rwa [Finset.card_image_iff.mpr (by simp)] at this
+  · simp only [Equiv.prodCongr_apply, Finset.disjoint_singleton_right, Finset.mem_image,
+      Finset.mem_filter, Finset.mem_univ, gt_iff_lt, true_and, Prod.exists, Prod.map_apply,
+      Prod.mk.injEq, not_exists, not_and, and_imp]
+    grind
+
+lemma inversionNumber_mul_swap_castSucc_succ_eq_of_le' (σ : Equiv.Perm (Fin (n + 1))) (i : Fin n)
+    (h : σ i.succ < σ i.castSucc) :
+    ι (σ * (Ψ i)) = (ι σ) - 1 := by
+  let φ := σ * (Ψ i)
+  have := inversionNumber_mul_swap_castSucc_succ_eq_of_le φ i (by grind)
+  grind [Equiv.mul_swap_mul_self]
+
+lemma inversionNumber_mul_swap_castSucc_succ_eq (σ : Equiv.Perm (Fin (n + 1))) (i : Fin n) :
+    ι (σ * (Ψ i)) = if (σ i.castSucc < σ i.succ) then (ι σ) + 1 else (ι σ) - 1 := by
+  grind [Equiv.injective, Fin.lt_def, Fin.val_succ, Fin.coe_castSucc,
+    inversionNumber_mul_swap_castSucc_succ_eq_of_le,
+    inversionNumber_mul_swap_castSucc_succ_eq_of_le']
+
+theorem inversionNumber_one : ι (1 : Equiv.Perm (Fin n)) = 0 := by
+  dsimp [Fin.inversionNumber, Fin.inversionSet]
+  grind [gt_iff_lt, Finset.card_eq_zero, Finset.filter_eq_empty_iff, not_lt]
+
+lemma inversionSet_swap_castSucc (i : Fin n) : ℐ (Ψ i) = {(i.castSucc, i.succ)} := by
+  ext ⟨i₀, j₀⟩
+  grind [Fin.lt_def, Fin.val_succ, Fin.coe_castSucc]
+
+lemma inversionNumber_swap_castSucc_succ (i : Fin n) :
+    ι (Ψ i) = 1 := by
+  dsimp [Fin.inversionNumber]
+  rw [inversionSet_swap_castSucc, Finset.card_singleton]
+
+lemma inversionNumber_eq_zero_iff (σ : Equiv.Perm (Fin n)) :
+    ι σ = 0 ↔ σ = 1 where
+  mp h := by
+    simp only [Fin.inversionNumber, Finset.card_eq_zero, Finset.filter_eq_empty_iff,
+      Finset.mem_univ, gt_iff_lt, not_and, not_lt, forall_const, Prod.forall] at h
+    have : StrictMono σ := by
+      intro a b h
+      grind [Equiv.injective]
+    have : σ = @id (Fin n) := le_antisymm (StrictMono.le_id this) (StrictMono.id_le this)
+    ext x
+    exact congr($this x)
+  mpr h := by grind [inversionNumber_one]
+
+end Fin
+
+end inversionNumber
