@@ -11,15 +11,18 @@ public import Mathlib.CategoryTheory.Iso
 /-!
 # Simproc for canceling morphisms with their inverses
 
-This module implements the `cancelIso` simproc, which triggers on expressions of the form `f ≫ g`.
+This module implements the `cancelIso` simproc, which simplifies the composition of a
+morphism and its inverse, given an expression of the form `f ≫ g`.
 
-If `g` is not a composition itself, it checks whether `f` is inverse to `g`,
-by checking if `f` has an `IsIso` instance, and then running `push inv` on `inv f` and on `g`.
-If the results of `push inv` are equal, then `f ≫ g` is rewritten to `𝟙 _`.
+Assuming `f` is not a composition (as `Category.assoc` is tagged `@[simp]`),
+if `g` is not a composition itself, it checks whether `f` is inverse to `g`
+by checking if `f` has an `IsIso` instance and then by running `push inv` on `inv f` and on `g`.
+If the check succeeds, then `f ≫ g` is rewritten to `𝟙 _`.
 
 If `g` is of the form `h ≫ k`, the procedure instead checks if `f` and `h` are inverses to each
-other, and the procedure rewrites `f ≫ h ≫ k` to `k` if that is the case.
-This is useful as `f ≫ (g ≫ h)` is in simp-normal form and does not contain `f ≫ g` directly as a subterm.
+other, and the procedure rewrites `f ≫ g ≫ h` to `h` if that is the case.
+This special case is useful as `f ≫ (g ≫ h)` is in simp-normal form and does not
+contain `f ≫ g` directly as a subterm.
 
 For instance, the simproc will successfully rewrite expressions such as
 `F.map (G.map (inv (H.map (e.hom)))) ≫ F.map (G.map (H.map (e.inv)))` to `𝟙 _`
@@ -28,7 +31,6 @@ because `CategoyTheory.Functor.map_inv` is a `@[push ←]` lemma, and
 
 This procedure is mostly intended as a post-procedure: it will work better if `f` and `g`
 have already been traversed beforehand.
-
 -/
 
 public meta section
@@ -52,7 +54,8 @@ lemma hom_inv_id_of_eq_assoc {C : Type*} [Category* C] {x y : C}
 composable morphisms `f : x ⟶ y` and `g : y ⟶ z` in a category `C`,
 check if `g` is equal to the inverse of `f` by
 1. first checking the objects match (i.e x = z).
-2. Checking that `f` is an isomorphism by looking for an `IsIso` instance allowing us to write `inv f`.
+2. Checking that `f` is an isomorphism by looking for an `IsIso` instance,
+  allowing us to write `inv f`.
 3. running `push inv` on both `inv f` and `g`, and checking that the results are equal.
 
 If they are inverse, return a proof of `inv f = g`.
@@ -71,20 +74,23 @@ def tryCancelPair (C x y z f g : Expr) : MetaM (Option Expr) := do
     (← pushed_inv.proof?.getDM (mkEqRefl inv_f))
     (← (← pushed_g.proof?.mapM mkEqSymm).getDM (mkEqRefl g))
 
-/-- `cancelIso` simplifies the composition of a morphism and its inverse, given an expression of the form `f ≫ g`.
+/-- `cancelIso` simplifies the composition of a morphism and its inverse,
+given an expression of the form `f ≫ g`.
 
-If `g` is not a composition itself, it checks whether `f` is inverse to `g`
+Assuming `f` is not a composition (as `Category.assoc` is tagged `@[simp]`),
+if `g` is not a composition itself, it checks whether `f` is inverse to `g`
 by checking if `f` has an `IsIso` instance and then by running `push inv` on `inv f` and on `g`.
 If the check succeeds, then `f ≫ g` is rewritten to `𝟙 _`.
 
 If `g` is of the form `h ≫ k`, the procedure instead checks if `f` and `h` are inverses to each
 other, and the procedure rewrites `f ≫ g ≫ h` to `h` if that is the case.
-This is useful as simp-normal forms in category theory are right-associated.
+This special case is useful as `f ≫ (g ≫ h)` is in simp-normal form and does not
+contain `f ≫ g` directly as a subterm.
 
 For instance, the simproc will successfully rewrite expressions such as
 `F.map (G.map (inv (H.map (e.hom)))) ≫ F.map (G.map (H.map (e.inv)))` to `𝟙 _`
 because `CategoyTheory.Functor.map_inv` is a `@[push ←]` lemma, and
-`CategoyTheory.IsIso.Iso.inv_hom` is a `[push]` lemma.
+`CategoyTheory.IsIso.Iso.inv_hom` is a `@[push]` lemma.
 
 This procedure is mostly intended as a post-procedure: it will work better if `f` and `g`
 have already been traversed beforehand. -/
