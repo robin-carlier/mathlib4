@@ -26,8 +26,8 @@ contain `f ≫ g` directly as a subterm.
 
 For instance, the simproc will successfully rewrite expressions such as
 `F.map (G.map (inv (H.map (e.hom)))) ≫ F.map (G.map (H.map (e.inv)))` to `𝟙 _`
-because `CategoyTheory.Functor.map_inv` is a `@[push ←]` lemma, and
-`CategoyTheory.IsIso.Iso.inv_hom` is a `@[push]` lemma.
+because `CategoryTheory.Functor.map_inv` is a `@[push ←]` lemma, and
+`CategoryTheory.IsIso.Iso.inv_hom` is a `@[push]` lemma.
 
 This procedure is mostly intended as a post-procedure: it will work better if `f` and `g`
 have already been traversed beforehand.
@@ -89,8 +89,8 @@ contain `f ≫ g` directly as a subterm.
 
 For instance, the simproc will successfully rewrite expressions such as
 `F.map (G.map (inv (H.map (e.hom)))) ≫ F.map (G.map (H.map (e.inv)))` to `𝟙 _`
-because `CategoyTheory.Functor.map_inv` is a `@[push ←]` lemma, and
-`CategoyTheory.IsIso.Iso.inv_hom` is a `@[push]` lemma.
+because `CategoryTheory.Functor.map_inv` is a `@[push ←]` lemma, and
+`CategoryTheory.IsIso.Iso.inv_hom` is a `@[push]` lemma.
 
 This procedure is mostly intended as a post-procedure: it will work better if `f` and `g`
 have already been traversed beforehand. -/
