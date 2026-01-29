@@ -20,8 +20,8 @@ by checking if `f` has an `IsIso` instance and then by running `push inv` on `in
 If the check succeeds, then `f ≫ g` is rewritten to `𝟙 _`.
 
 If `g` is of the form `h ≫ k`, the procedure instead checks if `f` and `h` are inverses to each
-other, and the procedure rewrites `f ≫ g ≫ h` to `h` if that is the case.
-This special case is useful as `f ≫ (g ≫ h)` is in simp-normal form and does not
+other, and the procedure rewrites `f ≫ h ≫ k` to `k` if that is the case.
+This special case is useful as `f ≫ (h ≫ k)` is in simp-normal form and does not
 contain `f ≫ g` directly as a subterm.
 
 For instance, the simproc will successfully rewrite expressions such as
@@ -83,8 +83,8 @@ by checking if `f` has an `IsIso` instance and then by running `push inv` on `in
 If the check succeeds, then `f ≫ g` is rewritten to `𝟙 _`.
 
 If `g` is of the form `h ≫ k`, the procedure instead checks if `f` and `h` are inverses to each
-other, and the procedure rewrites `f ≫ g ≫ h` to `h` if that is the case.
-This special case is useful as `f ≫ (g ≫ h)` is in simp-normal form and does not
+other, and the procedure rewrites `f ≫ h ≫ k` to `k` if that is the case.
+This special case is useful as `f ≫ (h ≫ k)` is in simp-normal form and does not
 contain `f ≫ g` directly as a subterm.
 
 For instance, the simproc will successfully rewrite expressions such as
@@ -97,7 +97,7 @@ have already been traversed beforehand. -/
 def cancelIsoSimproc : Simp.Simproc := fun e => do
   let_expr CategoryStruct.comp C instCat x y t f g := e | return .continue
   match_expr g with
-  -- Right_associated expressions needs their own logic.
+  -- Right-associated expressions needs their own logic.
   | CategoryStruct.comp _ _ _ z _ g h =>
     let some p₀ ← tryCancelPair C x y z f g | return .continue
     -- Builds the proof that `f ≫ g ≫ h = h.
