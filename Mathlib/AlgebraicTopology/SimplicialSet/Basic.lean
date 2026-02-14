@@ -33,22 +33,10 @@ open Simplicial
 /-- The category of simplicial sets.
 This is the category of contravariant functors from
 `SimplexCategory` to `Type u`. -/
-def SSet : Type (u + 1) :=
+abbrev SSet : Type (u + 1) :=
   SimplicialObject (Type u)
 
 namespace SSet
-
-instance largeCategory : LargeCategory SSet := by
-  dsimp only [SSet]
-  infer_instance
-
-instance hasLimits : HasLimits SSet := by
-  dsimp only [SSet]
-  infer_instance
-
-instance hasColimits : HasColimits SSet := by
-  dsimp only [SSet]
-  infer_instance
 
 @[ext]
 lemma hom_ext {X Y : SSet} {f g : X ⟶ Y} (w : ∀ n, f.app n = g.app n) : f = g :=

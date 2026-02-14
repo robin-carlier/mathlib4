@@ -49,13 +49,8 @@ variable (C : Type u) [Category.{v} C]
 
 /-- The category of simplicial objects valued in a category `C`.
 This is the category of contravariant functors from `SimplexCategory` to `C`. -/
-def SimplicialObject :=
+abbrev SimplicialObject :=
   SimplexCategoryᵒᵖ ⥤ C
-
-@[simps!]
-instance : Category (SimplicialObject C) := by
-  dsimp only [SimplicialObject]
-  infer_instance
 
 namespace SimplicialObject
 
