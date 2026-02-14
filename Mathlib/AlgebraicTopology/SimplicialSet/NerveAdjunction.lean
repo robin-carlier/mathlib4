@@ -376,7 +376,7 @@ open SSet
 
 /-- The adjunction between the nerve functor and the homotopy category functor is, up to
 isomorphism, the composite of the adjunctions `SSet.coskAdj 2` and `nerve₂Adj`. -/
-noncomputable def nerveAdjunction : hoFunctor.{u} ⊣ nerveFunctor.{u} :=
+noncomputable def nerveAdjunction : hoFunctor ⊣ nerveFunctor :=
   Adjunction.ofNatIsoRight ((SSet.coskAdj 2).comp Truncated.nerve₂Adj) Nerve.cosk₂Iso.symm
 
 
@@ -389,15 +389,15 @@ instance nerveFunctor.full : nerveFunctor.{u, u}.Full :=
   Functor.Full.of_iso Nerve.cosk₂Iso.symm
 
 /-- The nerve functor is both full and faithful and thus is fully faithful. -/
-noncomputable def nerveFunctor.fullyfaithful : nerveFunctor.{u}.FullyFaithful :=
+noncomputable def nerveFunctor.fullyfaithful : nerveFunctor.FullyFaithful :=
   Functor.FullyFaithful.ofFullyFaithful _
 
-instance nerveAdjunction.isIso_counit : IsIso nerveAdjunction.{u}.counit :=
+instance nerveAdjunction.isIso_counit : IsIso nerveAdjunction.counit :=
   Adjunction.counit_isIso_of_R_fully_faithful _
 
 /-- The counit map of `nerveAdjunction` is an isomorphism since the nerve functor is fully
 faithful. -/
-noncomputable def nerveFunctorCompHoFunctorIso : nerveFunctor.{u, u} ⋙ hoFunctor.{u} ≅ 𝟭 Cat :=
+noncomputable def nerveFunctorCompHoFunctorIso : nerveFunctor.{u, u} ⋙ hoFunctor ≅ 𝟭 Cat :=
   asIso (nerveAdjunction.counit)
 
 noncomputable instance : Reflective nerveFunctor where
@@ -406,8 +406,8 @@ noncomputable instance : Reflective nerveFunctor where
 
 section
 
-instance (C D : Type u) [SmallCategory C] [SmallCategory D] :
-    IsIso (prodComparison (nerveFunctor ⋙ hoFunctor.{u} ⋙ nerveFunctor)
+instance (C D : Type u) [Category.{u} C] [Category.{u} D] :
+    IsIso (prodComparison (nerveFunctor ⋙ hoFunctor ⋙ nerveFunctor)
       (Cat.of C) (Cat.of D)) := by
   let iso : nerveFunctor ⋙ hoFunctor ⋙ nerveFunctor ≅ nerveFunctor :=
     (nerveFunctor.associator hoFunctor nerveFunctor).symm ≪≫
@@ -419,14 +419,14 @@ namespace hoFunctor
 
 instance : hoFunctor.IsLeftAdjoint := nerveAdjunction.isLeftAdjoint
 
-instance (C D : Type u) [SmallCategory C] [SmallCategory D] :
-    IsIso (prodComparison hoFunctor.{u} (nerve C) (nerve D)) := by
-  have : IsIso (nerveFunctor.map (prodComparison hoFunctor.{u} (nerve C) (nerve D))) := by
+instance (C D : Type u) [Category.{u} C] [Category.{u} D] :
+    IsIso (prodComparison hoFunctor (nerve C) (nerve D)) := by
+  have : IsIso (nerveFunctor.map (prodComparison hoFunctor (nerve C) (nerve D))) := by
     have : IsIso (prodComparison (hoFunctor ⋙ nerveFunctor) (nerve C) (nerve D)) :=
       IsIso.of_isIso_fac_left
-        (prodComparison_comp nerveFunctor.{u} (hoFunctor ⋙ nerveFunctor.{u})
+        (prodComparison_comp nerveFunctor (hoFunctor ⋙ nerveFunctor)
           (A := Cat.of C) (B := Cat.of D)).symm
-    exact IsIso.of_isIso_fac_right (prodComparison_comp hoFunctor nerveFunctor.{u}).symm
+    exact IsIso.of_isIso_fac_right (prodComparison_comp hoFunctor nerveFunctor).symm
   exact isIso_of_fully_faithful nerveFunctor _
 
 instance isIso_prodComparison_stdSimplex.{w} (n m : ℕ) :
@@ -437,17 +437,17 @@ instance isIso_prodComparison_stdSimplex.{w} (n m : ℕ) :
 lemma isIso_prodComparison_of_stdSimplex {D : SSet.{u}} (X : SSet.{u})
     (H : ∀ m, IsIso (prodComparison hoFunctor.{u} D Δ[m])) :
     IsIso (prodComparison hoFunctor.{u} D X) := by
-  have : IsIso (Functor.whiskerLeft (CostructuredArrow.proj uliftYoneda.{u} X ⋙ uliftYoneda.{u})
+  have : IsIso (Functor.whiskerLeft (CostructuredArrow.proj uliftYoneda X ⋙ uliftYoneda)
       (prodComparisonNatTrans hoFunctor.{u} D)) := by
     rw [NatTrans.isIso_iff_isIso_app]
     exact fun x ↦ H (x.left).len
-  exact isIso_app_coconePt_of_preservesColimit _ (prodComparisonNatTrans hoFunctor.{u} _) _
+  exact isIso_app_coconePt_of_preservesColimit _ (prodComparisonNatTrans hoFunctor _) _
     (Presheaf.isColimitTautologicalCocone' X)
 
 instance isIso_prodComparison (X Y : SSet.{u}) :
     IsIso (prodComparison hoFunctor.{u} X Y) := isIso_prodComparison_of_stdSimplex _ fun m ↦ by
   convert_to IsIso (hoFunctor.map (prod.braiding _ _).hom ≫
-    prodComparison hoFunctor.{u} Δ[m] X ≫ (prod.braiding _ _).hom)
+    prodComparison hoFunctor Δ[m] X ≫ (prod.braiding _ _).hom)
   · ext <;> simp [← Functor.map_comp]
   suffices IsIso (prodComparison hoFunctor Δ[m] X) by infer_instance
   exact isIso_prodComparison_of_stdSimplex _ (isIso_prodComparison_stdSimplex _)
@@ -462,7 +462,7 @@ instance preservesBinaryProduct (X Y : SSet.{u}) :
 `Discrete WalkingPair`. -/
 instance preservesBinaryProducts :
     PreservesLimitsOfShape (Discrete WalkingPair) hoFunctor.{u} where
-  preservesLimit {F} := preservesLimit_of_iso_diagram hoFunctor.{u} (diagramIsoPair F).symm
+  preservesLimit {F} := preservesLimit_of_iso_diagram hoFunctor (diagramIsoPair F).symm
 
 /-- The functor `hoFunctor : SSet ⥤ Cat` preserves finite products of simplicial sets. -/
 instance preservesFiniteProducts : PreservesFiniteProducts hoFunctor.{u} :=
