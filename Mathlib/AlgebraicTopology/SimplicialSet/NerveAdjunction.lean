@@ -430,13 +430,13 @@ instance (C D : Type u) [Category.{u} C] [Category.{u} D] :
   exact isIso_of_fully_faithful nerveFunctor _
 
 instance isIso_prodComparison_stdSimplex.{w} (n m : ℕ) :
-    IsIso (prodComparison hoFunctor.{w} (Δ[n] : SSet.{w}) Δ[m]) :=
-  IsIso.of_isIso_fac_right (prodComparison_natural
-    hoFunctor.{w} (stdSimplex.isoNerve n).hom (stdSimplex.isoNerve m).hom).symm
+    IsIso (prodComparison hoFunctor (Δ[n] : SSet.{w}) Δ[m]) :=
+  IsIso.of_isIso_fac_right (prodComparison_natural.{w}
+    hoFunctor (stdSimplex.isoNerve n).hom (stdSimplex.isoNerve m).hom).symm
 
 lemma isIso_prodComparison_of_stdSimplex {D : SSet.{u}} (X : SSet.{u})
-    (H : ∀ m, IsIso (prodComparison hoFunctor.{u} D Δ[m])) :
-    IsIso (prodComparison hoFunctor.{u} D X) := by
+    (H : ∀ m, IsIso (prodComparison hoFunctor D Δ[m])) :
+    IsIso (prodComparison hoFunctor D X) := by
   have : IsIso (Functor.whiskerLeft (CostructuredArrow.proj uliftYoneda X ⋙ uliftYoneda)
       (prodComparisonNatTrans hoFunctor.{u} D)) := by
     rw [NatTrans.isIso_iff_isIso_app]
@@ -454,18 +454,18 @@ instance isIso_prodComparison (X Y : SSet.{u}) :
 
 /-- The functor `hoFunctor : SSet ⥤ Cat` preserves binary products of simplicial sets `X` and
 `Y`. -/
-instance preservesBinaryProduct (X Y : SSet.{u}) :
-    PreservesLimit (pair X Y) hoFunctor.{u} :=
+instance preservesBinaryProduct (X Y : SSet) :
+    PreservesLimit (pair X Y) hoFunctor :=
   PreservesLimitPair.of_iso_prod_comparison hoFunctor X Y
 
 /-- The functor `hoFunctor : SSet ⥤ Cat` preserves limits of functors out of
 `Discrete WalkingPair`. -/
 instance preservesBinaryProducts :
-    PreservesLimitsOfShape (Discrete WalkingPair) hoFunctor.{u} where
+    PreservesLimitsOfShape (Discrete WalkingPair) hoFunctor where
   preservesLimit {F} := preservesLimit_of_iso_diagram hoFunctor (diagramIsoPair F).symm
 
 /-- The functor `hoFunctor : SSet ⥤ Cat` preserves finite products of simplicial sets. -/
-instance preservesFiniteProducts : PreservesFiniteProducts hoFunctor.{u} :=
+instance preservesFiniteProducts : PreservesFiniteProducts hoFunctor :=
   PreservesFiniteProducts.of_preserves_binary_and_terminal _
 
 end hoFunctor
