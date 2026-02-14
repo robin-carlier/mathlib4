@@ -75,22 +75,9 @@ def uliftFunctor : SSet.{u} ⥤ SSet.{max u v} :=
   (SimplicialObject.whiskering _ _).obj CategoryTheory.uliftFunctor.{v, u}
 
 /-- Truncated simplicial sets. -/
-def Truncated (n : ℕ) :=
-  SimplicialObject.Truncated (Type u) n
+abbrev Truncated (n : ℕ) := SimplicialObject.Truncated (Type u) n
 
 namespace Truncated
-
-instance largeCategory (n : ℕ) : LargeCategory (Truncated n) := by
-  dsimp only [Truncated]
-  infer_instance
-
-instance hasLimits {n : ℕ} : HasLimits (Truncated n) := by
-  dsimp only [Truncated]
-  infer_instance
-
-instance hasColimits {n : ℕ} : HasColimits (Truncated n) := by
-  dsimp only [Truncated]
-  infer_instance
 
 /-- The ulift functor `SSet.Truncated.{u} ⥤ SSet.Truncated.{max u v}` on truncated
 simplicial sets. -/

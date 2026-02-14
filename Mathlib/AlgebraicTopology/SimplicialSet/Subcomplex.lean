@@ -92,7 +92,7 @@ lemma homOfLE_refl : homOfLE (by rfl : S₁ ≤ S₁) = 𝟙 _ := rfl
 lemma homOfLE_app_val (Δ : SimplexCategoryᵒᵖ) (x : S₁.obj Δ) :
     ((homOfLE h).app Δ x).val = x.val := rfl
 
-@[reassoc (attr := simp)]
+@[simp, reassoc]
 lemma homOfLE_ι : homOfLE h ≫ S₂.ι = S₁.ι := rfl
 
 instance mono_homOfLE : Mono (homOfLE h) := mono_of_mono_fac (homOfLE_ι h)
@@ -176,7 +176,7 @@ abbrev range : Y.Subcomplex := Subfunctor.range f
 /-- The morphism `X ⟶ Subcomplex.range f` induced by `f : X ⟶ Y`. -/
 abbrev toRange : X ⟶ Subcomplex.range f := Subfunctor.toRange f
 
-@[reassoc (attr := simp)]
+@[simp, reassoc]
 lemma toRange_ι : toRange f ≫ (Subcomplex.range f).ι = f := rfl
 
 @[simp]

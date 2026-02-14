@@ -217,32 +217,11 @@ def whiskering (D : Type*) [Category* D] : (C ⥤ D) ⥤ SimplicialObject C ⥤ 
   whiskeringRight _ _ _
 
 /-- Truncated simplicial objects. -/
-def Truncated (n : ℕ) :=
-  (SimplexCategory.Truncated n)ᵒᵖ ⥤ C
-
-instance {n : ℕ} : Category (Truncated C n) := by
-  dsimp [Truncated]
-  infer_instance
+abbrev Truncated (n : ℕ) := (SimplexCategory.Truncated n)ᵒᵖ ⥤ C
 
 variable {C}
 
 namespace Truncated
-
-instance {n} {J : Type v} [SmallCategory J] [HasLimitsOfShape J C] :
-    HasLimitsOfShape J (SimplicialObject.Truncated C n) := by
-  dsimp [Truncated]
-  infer_instance
-
-instance {n} [HasLimits C] : HasLimits (SimplicialObject.Truncated C n) :=
-  ⟨inferInstance⟩
-
-instance {n} {J : Type v} [SmallCategory J] [HasColimitsOfShape J C] :
-    HasColimitsOfShape J (SimplicialObject.Truncated C n) := by
-  dsimp [Truncated]
-  infer_instance
-
-instance {n} [HasColimits C] : HasColimits (SimplicialObject.Truncated C n) :=
-  ⟨inferInstance⟩
 
 variable (C) in
 /-- Functor composition induces a functor on truncated simplicial objects. -/
