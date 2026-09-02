@@ -184,7 +184,6 @@ lemma conjugateEquiv_pullbackComp_inv :
 variable {G' : D' ⥤ D''} {R'' : Sheaf K'' RingCat.{u}}
   [Functor.IsContinuous G' K' K'']
   [Functor.IsContinuous (G ⋙ G') K K'']
-  [Functor.IsContinuous ((F ⋙ G) ⋙ G') J K'']
   [Functor.IsContinuous (F ⋙ G ⋙ G') J K'']
   (ψ' : R' ⟶ (G'.sheafPushforwardContinuous RingCat.{u} K' K'').obj R'')
 

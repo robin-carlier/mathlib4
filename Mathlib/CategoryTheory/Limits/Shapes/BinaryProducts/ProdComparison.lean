@@ -42,7 +42,6 @@ variable (F : C ⥤ D) (G : D ⥤ E) {A A' B B' : C}
 variable [HasBinaryProduct A B] [HasBinaryProduct A' B']
 variable [HasBinaryProduct (F.obj A) (F.obj B)]
 variable [HasBinaryProduct (F.obj A') (F.obj B')]
-variable [HasBinaryProduct (G.obj (F.obj A)) (G.obj (F.obj B))]
 variable [HasBinaryProduct ((F ⋙ G).obj A) ((F ⋙ G).obj B)]
 
 /-- The product comparison morphism.
