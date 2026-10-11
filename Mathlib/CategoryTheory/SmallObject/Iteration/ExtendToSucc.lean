@@ -124,6 +124,7 @@ open extendToSucc in
 include hj in
 /-- The extension to `Set.Iic (Order.succ j) ⥤ C` of a functor `F : Set.Iic j ⥤ C`,
 when we specify a morphism `F.obj ⟨j, _⟩ ⟶ X`. -/
+@[implicit_reducible]
 def extendToSucc : Set.Iic (Order.succ j) ⥤ C where
   obj := obj F X
   map {i₁ i₂} f := map hj F τ i₁ i₂ (leOfHom f) i₂.2
@@ -156,6 +157,12 @@ lemma extendToSuccObjIso_hom_naturality (i₁ i₂ : J) (hi : i₁ ≤ i₂) (hi
       (extendToSuccObjIso hj F τ i₁ (hi.trans hi₂)).hom ≫ F.map (homOfLE hi) := by
   dsimp [extendToSucc, extendToSuccObjIso]
   rw [extendToSucc.map_eq _ _ _ _ _ _ hi₂, assoc, assoc, Iso.inv_hom_id, comp_id]
+
+@[reassoc]
+lemma extendToSuccObjIso_inv_naturality (i₁ i₂ : J) (hi : i₁ ≤ i₂) (hi₂ : i₂ ≤ j) :
+    (extendToSuccObjIso hj F τ i₁ (hi.trans hi₂)).inv ≫ (extendToSucc hj F τ).map (homOfLE hi) =
+    F.map (homOfLE hi) ≫ (extendToSuccObjIso hj F τ i₂ hi₂).inv := by
+  simp [Eq.comm, Iso.comp_inv_eq, Category.assoc, extendToSuccObjIso_hom_naturality]
 
 /-- The isomorphism expressing that `extendToSucc hj F τ` extends `F`. -/
 @[simps!]
